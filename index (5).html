@@ -1,0 +1,976 @@
+<title>Радар партнёрских рисков</title>
+<style>
+  :root {
+    --bg-1: #07050C;
+    --bg-2: #3D1959;
+    --card: #F6F1FB;
+    --card-2: #FBF8FE;
+    --text-dark: #1A0F2E;
+    --text-dark-muted: #5B5470;
+    --text-light: #F2EDFA;
+    --text-muted: #C9BEDD;
+    --teal: #1FD1A8;
+    --pink: #D61EC4;
+    --gold: #8B3FE8;
+    --border-mint: #E4D9F5;
+    --ok: #1FD1A8;
+    --bad: #E5484D;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg-1);
+  }
+
+  body {
+    font-family: Arial, Helvetica, "Segoe UI", sans-serif;
+    color: var(--text-light);
+    background:
+      radial-gradient(1200px 700px at 85% 100%, rgba(214, 30, 196, 0.22), transparent 60%),
+      linear-gradient(135deg, var(--bg-1) 0%, var(--bg-2) 100%);
+    min-height: 100%;
+    padding-inline: 16px;
+    padding-block: 28px 48px;
+  }
+
+  .wrap {
+    max-width: 760px;
+    margin: 0 auto;
+  }
+
+  .brand-lockup {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+
+  .brand-word {
+    font-size: 13px;
+    font-weight: bold;
+    letter-spacing: 3px;
+    color: var(--text-light);
+  }
+
+  .kicker {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    font-weight: bold;
+    letter-spacing: 2px;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .kicker .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--gold);
+    flex: none;
+  }
+
+  h1 {
+    font-size: clamp(24px, 4.5vw, 34px);
+    line-height: 1.15;
+    margin: 0 0 8px;
+    color: #fff;
+    text-wrap: balance;
+  }
+
+  .subtitle {
+    color: var(--text-muted);
+    font-size: 14.5px;
+    line-height: 1.5;
+    margin: 0 0 22px;
+    max-width: 62ch;
+  }
+
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+  }
+
+  .progress-label {
+    font-size: 12.5px;
+    color: var(--text-muted);
+    font-weight: bold;
+    letter-spacing: 0.5px;
+  }
+
+  .score-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.14);
+    color: var(--text-light);
+    font-size: 12.5px;
+    font-weight: bold;
+    padding: 6px 12px;
+    border-radius: 999px;
+  }
+
+  .score-pill b { color: var(--gold); font-size: 13.5px; }
+
+  .progress-track {
+    height: 6px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.10);
+    overflow: hidden;
+    margin-bottom: 26px;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--pink), var(--gold));
+    border-radius: 999px;
+    transition: width 0.35s ease;
+    width: 0%;
+  }
+
+  .card {
+    background: var(--card);
+    border-radius: 18px;
+    padding: 26px 24px 24px;
+    box-shadow: 0 18px 40px rgba(10, 5, 24, 0.35);
+    margin-bottom: 16px;
+  }
+
+  .q-index-pill {
+    display: inline-block;
+    background: var(--pink);
+    color: #fff;
+    font-size: 11.5px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    margin-bottom: 14px;
+  }
+
+  .scenario-label {
+    font-size: 11.5px;
+    font-weight: bold;
+    letter-spacing: 1.5px;
+    color: var(--teal);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .scenario-text {
+    color: var(--text-dark);
+    font-size: 15.5px;
+    line-height: 1.55;
+    margin: 0 0 16px;
+    max-width: 62ch;
+  }
+
+  .hint-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: none;
+    color: var(--teal);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 4px 0;
+    margin-bottom: 18px;
+  }
+
+  .hint-toggle:hover { text-decoration: underline; }
+
+  .hint-box {
+    display: none;
+    background: #DFF3EE;
+    border-left: 3px solid var(--teal);
+    color: var(--text-dark-muted);
+    font-size: 13.5px;
+    line-height: 1.5;
+    padding: 10px 14px;
+    border-radius: 4px;
+    margin: -8px 0 18px;
+  }
+
+  .hint-box.shown { display: block; }
+
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 4px;
+  }
+
+  .option {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    text-align: left;
+    width: 100%;
+    background: #fff;
+    border: 1.5px solid var(--border-mint);
+    border-radius: 12px;
+    padding: 13px 14px;
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 1.45;
+    color: var(--text-dark);
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease, transform 0.1s ease;
+  }
+
+  .option:hover:not(:disabled) {
+    border-color: var(--pink);
+    transform: translateY(-1px);
+  }
+
+  .option:disabled { cursor: default; }
+
+  .option .letter {
+    flex: none;
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: var(--card-2);
+    border: 1.5px solid var(--border-mint);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+    color: var(--text-dark-muted);
+  }
+
+  .option.correct {
+    border-color: var(--ok);
+    background: #E7F8EE;
+  }
+  .option.correct .letter {
+    background: var(--ok);
+    border-color: var(--ok);
+    color: #fff;
+  }
+
+  .option.incorrect {
+    border-color: var(--bad);
+    background: #FCE9E9;
+  }
+  .option.incorrect .letter {
+    background: var(--bad);
+    border-color: var(--bad);
+    color: #fff;
+  }
+
+  .feedback {
+    display: none;
+    margin-top: 16px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    font-size: 13.5px;
+    line-height: 1.55;
+  }
+  .feedback.shown { display: block; }
+  .feedback.ok { background: #E7F8EE; border: 1px solid var(--ok); color: #145C33; }
+  .feedback.bad { background: #FCE9E9; border: 1px solid var(--bad); color: #7A1E21; }
+
+  .feedback .fb-title {
+    font-weight: bold;
+    font-size: 13px;
+    letter-spacing: 0.3px;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .cat-tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+    color: #fff;
+    padding: 3px 9px;
+    border-radius: 999px;
+    margin-top: 10px;
+  }
+
+  .nav-row {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 18px;
+  }
+
+  .btn-next {
+    display: none;
+    background: var(--gold);
+    color: #241A0A;
+    border: none;
+    font-family: inherit;
+    font-weight: bold;
+    font-size: 14px;
+    padding: 11px 22px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: filter 0.15s ease;
+  }
+  .btn-next:hover { filter: brightness(1.06); }
+  .btn-next.shown { display: inline-flex; align-items: center; gap: 6px; }
+
+  /* Results screen */
+  .results { display: none; }
+  .results.shown { display: block; }
+  .quiz-view.hidden { display: none; }
+
+  .score-hero {
+    background: var(--card);
+    border-radius: 18px;
+    padding: 32px 24px;
+    text-align: center;
+    box-shadow: 0 18px 40px rgba(10, 5, 24, 0.35);
+    margin-bottom: 18px;
+  }
+
+  .score-hero .big {
+    font-size: 48px;
+    font-weight: bold;
+    color: var(--text-dark);
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+  .score-hero .big span { color: var(--teal); }
+
+  .score-hero .verdict {
+    margin-top: 8px;
+    color: var(--text-dark-muted);
+    font-size: 14.5px;
+  }
+
+  .cat-breakdown {
+    background: var(--card);
+    border-radius: 18px;
+    padding: 22px 22px 18px;
+    margin-bottom: 18px;
+    box-shadow: 0 18px 40px rgba(10, 5, 24, 0.35);
+  }
+
+  .cat-breakdown h2 {
+    font-size: 12.5px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--teal);
+    margin: 0 0 16px;
+  }
+
+  .cat-row {
+    display: grid;
+    grid-template-columns: 18px 1fr 46px;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .cat-row .swatch {
+    width: 12px; height: 12px; border-radius: 3px;
+  }
+
+  .cat-row .name {
+    font-size: 13px;
+    color: var(--text-dark);
+  }
+
+  .cat-row .bar-track {
+    grid-column: 1 / -1;
+    height: 7px;
+    background: #DCEFE7;
+    border-radius: 999px;
+    overflow: hidden;
+    margin: -4px 0 4px 28px;
+  }
+  .cat-row .bar-fill { height: 100%; border-radius: 999px; }
+
+  .cat-row .frac {
+    font-size: 12.5px;
+    font-weight: bold;
+    color: var(--text-dark-muted);
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .btn-restart {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: transparent;
+    border: 1.5px solid var(--text-muted);
+    color: var(--text-light);
+    font-family: inherit;
+    font-weight: bold;
+    font-size: 13.5px;
+    padding: 10px 18px;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+  .btn-restart:hover { border-color: var(--pink); color: #fff; }
+
+  .review {
+    margin-top: 22px;
+  }
+
+  .review-toggle {
+    background: none;
+    border: none;
+    color: var(--text-light);
+    font-family: inherit;
+    font-weight: bold;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 6px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .review-list { display: none; margin-top: 14px; }
+  .review-list.shown { display: block; }
+
+  .review-item {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+  }
+
+  .review-item .ri-top {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+
+  .ri-mark {
+    flex: none;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: bold; color: #fff;
+  }
+  .ri-mark.ok { background: var(--ok); }
+  .ri-mark.bad { background: var(--bad); }
+
+  .ri-num { font-size: 12px; color: var(--text-muted); font-weight: bold; }
+
+  .review-item .ri-scenario {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.45;
+    margin-bottom: 8px;
+  }
+
+  .review-item .ri-answer {
+    font-size: 13.5px;
+    color: var(--text-light);
+    line-height: 1.5;
+  }
+  .review-item .ri-answer b { color: var(--gold); }
+
+  footer {
+    margin-top: 34px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255,255,255,0.10);
+    font-size: 10.5px;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  @media (max-width: 460px) {
+    .score-hero .big { font-size: 40px; }
+    .card { padding: 20px 16px 18px; }
+  }
+</style>
+
+<div class="wrap">
+  <div class="brand-lockup" aria-hidden="true">
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAV4AAAA+CAYAAABjqHP0AAAk0klEQVR4nO2deXwc5XnHf8/s7H1qdUvWYdn4wjYuNvcVCphAEo4ATaCUQpPQNoFCaJK2OUhCkpa2CeQgR0lDIAkhCVCHw4ANsR3bGNvYYFvGsqzD0to6Vteu9r5mnv4xKyNLe2t12Mz389kPeN5zdkfPvO/zPgehyDCzfhSjpvW/3Y6zFp1xRnyUbuhtHaK+zmEMd3mF+SvqPqwVdSv9IyFEfFFEIwlEg3FEAjGwzEjEJEgxeVK/ol5AdVM5Lv77hc+decEZt0wYU/fD/bvv+X13W/lZ9nJcUDsPTWbLQGt792/OcTgSK1asgI7IEy/2zaqoqKgUAE2lMTMbh9GmDXSYzhk9Hjz/na0tqHRWXhMciSxytfZDCsFo1FkssXAc8XAC8UgC0WgcsiwBINDY6ATQ2FTSzEiOM+rWOHHBZxuuWLVq1aaT5jE8fOEXulre/GlXKxw6PaxaHbQyQwoEhhbZSnhpWQWkcPjlUok7LqlvCiwelZ4rXbXILxD5eCpfgIqKikoB5CV4mZkA2Ls6Xbf2tA45pVHhE8dbB2p8PRG7mDCIXrcfIV8UUlwCA2CZIbOsCFgaJ2gLQE4wLr5zqbz6rvlnV1oq948vO9zZ9jef7jj4q+0DvRCIlLEBCBoNKHmTZp0OlQYTKrU62ANh73m1dVJpKP78mnl13WfaSzaZSkubiShY+AxVVFRUckPMpRIzl/cc6/mrfVtar+47NHzBcGeozNcbxUiPD/GYBCkhgVkGCUJSyCYbCoAwtUX1CQwmPfSltKPCXNEysexIJPzprmgIRARhvHSXFZUFAwhEIvCFwzgCBmlEx8ajLSjR6u9eJoTReIwi5zrKBva4up9ZXVb+gt5sfivG6lpYRUVlesgoFZnZdHBr9219LYP3DbYGlve0DCHgCSMeT4AEUj7FkasZkSVGdVMZrvji0l8vO2fhHRPmqPnyjs27H+nvPDsRi+cs5sdWxbIsA4IAk1aLBbYSXGAviZzvKH/5EoPtGwvr6w8TkVT0G1JRUflAk3LFyzxaumP90bue//etn3PtHWr0D0QQCUUhaAhEBI1WmNFJssywzzNi/vLaX00s6z9+/JJhrWZFNBqFSLnPa2xhLghKm2g8huahfjQPuQ0vWHpuXmWwXL3WP7R3T3f3k6vr658mokSx7kdFReWDzUmCl5nNh3a0/+Nz/7H3nwbfC9UNHPUgHpcAwswK2wm7fK1OC0edqd9gMBycWHXfYH/1gZFB7RTPCUEgiMnl+2DAj9dDQevbodEPbS2t+tB1Hvdnuru7729oaNgzpUFUVFRUME7wDvvcF23/4/5H214bPMd1wI1YPA5BIOSxiEwNAwzGCbsFHidXmcGsrDq1Oi2IAEEjKDKU329vthtRUm15ggTqn9j9oFb8h85YeKwqmBmUFKCFimKBCGCGNxTCC6FO7DS5L9oXDvz5zdaW716yeOnXJxu7qaioqOSOCADBYPC8t55pefmd/+tyePp90IgCBE3+YotZUQuwrEhNEgiiVgO9UQ9RS4hTlI1Wg2ywaGWTzSgbLFroTTpAknvb3+vaHAyHg3qLHqLu/YW4LAOWcgkDvT2PTVwJA4A3FBQXGs0JYywuBGVZgEGPcDyGcDwGSZZPCHCBFDVJPnclEEEAMBAK4seuI6bWaOjB33e02m9uWvR5IlJP31RUVApCZO4zv/jI3p8eerXf4fcEclcpMCAzAzKDSBHUJqsB1lITbOUmkEGSrZW6hLPGETLbzQcMJmFnMB7erBO1I1odBUpqywIl1QY2Go0AECS6dKSQGzivovampbW11cOjPqtMmC9azNeOBAPL+4OBpqP+Uc2wAO2QnMDxUACDoRBiUgLMDDAnBWt2UawhAsuMjT1dCDPus8kYZeZvqMJXRUWlEOjln735n4fW93zJ2xfMusplZkAGAILOqEVJhRV6pwb6UsTrl1YlBLO03lKmH6qoK49UNTme0wLHAGMCwDARRWfihgQAErMdgA2jEf2wEL+sc9C9pm2gH16D4fKusL+pxTci9mlFOhb0YygUhMwMSgribGI4wYy75y/BvRUN161YsOClGbglFRWV0wwx3J+4L6PQVRaHAAB7qRXGEi3KFpgT1mrDHnud8UDNwvL95PCvr6quZrPG6eJZVoDKAIhoFMBo8lI7gF8AADM70Oexuzhc3xHw3bqr/7jFU6n96Nv9PQ6XKFBfNIxQJAJNBgFMAF4c6sHFVse/CMBLqr5XRUUlX0TPsYA+VQEzICdkGIx6GEu1mLeyNFhaZ32xdkXZW5Ya4eWGhoZ+IgrP9ISnAhF5AXgBdAPYBgAcDNbuNjrrj8jxu17q6ajoM1o/digaEobDIRAzNBMMlQUieGMx7OpxOWbAhFlFReU0RAwHYpOO/+WEDINJj+qzSlC+0La7ZmnJIwsvrt7pdDq7Z2ea0weZzT0AegC8pSMBmzsP/8VbvtF794y4b9oR8tlcox4Q6IQAJgASMwYDQXWxq6KiUhAT7HgBUdCgYXUlFv1ldUfTmvKfz1tQ8yMiCs3WBGeSGMu4aP6idzXA3yVGg4+v7+/6t5fdPde95HGjJ+g/YecL4ITJmoqKikq+vC94GdCZNFh+TUPXsitrn1pydtNPiGhgFuc2a0gAyG7eqQGu97hcl57rKPvG//R2XL57ZHCS6qFYMPN5ABZPQ9fvQLmlczLUkQCsK/QFy8wNAC7LUOVdACMAriik/yy4iWjDhPnoAFwDwJ6h3TtENMkhZyLMrAGwFkB5imIJwOup/k6Y+XwAi7L1n4U3AXTmaj2TDGJ1JYDqKY6biheIaJSZrwPgmIb+J7KRSLHbZ+YrAdRMwxitRLRr/AVmXorMfyvZGIQy94yhBhTBy8oKrnalM7Dqr2uvXjBvwZEpDHzaIAGw1ddvZea1gkCv9kixK3tGR3OLLJQ/nwHwqWno9+sAEgC+k0O9hwoc44sAPpeh/AEAnQCeKrD/TLwNYMOEa/MB/AGALkO7Lma+gog6s/TfAOAlAJo05XcBeDLF9a8BuDZL39kYAjDIzL8F8Dsias9S3wjgNwAqpjhuKlZAObD+PpTvd7pZC2DMYerrAC6ehjEOMfPyCS+2BwB8eor9HmHmAwB+TkQbU1U4YbTLAOqWlktNtU09Uxz0tIOIEqud5QPVRotiUjc9TJe5nQxgOxThm4mGKYxxTYYyPxRhMF26mVQHvCKAbHHvGwF8OYf+MwnvsbFSUYwzgDIASwF8C8A2Zl6bpf54n89iM9bvTKkdx68Yp+sQX5viWroXbD4sAnAzgNeY+Wlmtk6s8L63BDMGu/w634hvZREGPq1gZuu+wYFFPQHfyWEnTw30RLQVyrY1E9czc1m+nSe31FUZqvyCiAaRYwjSIjEWfC4bdzLzJVPsK11ZsQVgFYDfM/O/ZKmnOvXkTqqXYzG/PwJwG4AXmXnZ+AJhrJiJcXRXv3HDT/a88vaW/V9h5voiTuCUpaun56KfNu9d92N315q+gP9UFLxjE/53ZF5VlwL4ZlKnmQ83ATClKZORtKGeo2igbC1PFRwAHmbm+2Z7Iip58SEALzHz8rELJ1a8RIRIMIaD63sce590ffvVx9/c1dZ89CE/Dy9P1dPpDDMbj3d3f+z55n3rHmpv3vSd7sNX7Bzqn7aDtWlmbDu1DYAvS907kfoQKRM3Zyh7HcB0nxektEPPg48w818WZSYzx0PMXDfDY449/IYZGm8mwiHO1L0AQBOAXzCzFpiw/SOBIMsyXM1DcLePVh3b5f9a3Wr7vS27j26ct6LspxaDZdvpHBicmWtaB/rveOLQ/jv/PDq0+M8jbnQHfCCZTzIlS9ae6entBeAqoN1YmqQogKcB3J+hrgnAJ6EcoGSFmW9C5hP0Z4kolktfUA5S3sqx7njeK6DNeLQAvgBgU7aKRWYDFN37mIARACwAYIViIeLI0NYG4G+g7GLy5R0oDkT54k3+92UA2XbDlyPz/JuheJRmwp3TrBS8ADbnUX+MQs6z+gDsTHH9LCjCNRNroFj2vCYaLLqkT/D7ySYFkRCLJdC1vw/Hmgcchze6/6pyse3mioWOP+38Y8vj510/v5nI0FrApOcUBEBm1u51uS5/YeBY0wNvb/vKm97BeS2BUfjDYRAlY/SOE7oMQEuESoutGEr4fPgeET1TaGMikpn5cSgntpYMVa9i5v/J5pWYNF36PNKvOBMAtuQxxV1E9PE86heT1czcQEQz6SD0ChH9MFUBM18KYCMyr+YnHdjkyCNE9HSBbUFE92erw8xvQxEy6XiciB4rdA4paJvBZ2dnqrGYuQLAfch8YCsAuIGZXxcdNcYh136adKhCBGhEAQBjqMeL4R6v0L6j/6qKhpKr9m84MvLH723rss7T7NRZ9a8tPbfBXVZetnuuq/WTgrb0YI/rwje6ukwau/lTN29YVz2swfK2SBh9oQBkKQEBBFFIvdORmVFhMOHC2gZXMZ+cHJjqlhpQVhkuAMsy1Lkair73eJa+LkFme8c3ABzLY24z/SIbTwWUg6u1RJRNHVMsUp2oAwCIaCsz/wHKqjYdmQ40M1GM5ygb2dQE2SxFij1eMUn5nBLRADN/G8pq/4IM7W8A8K9i5XLbM1WtZff2dQxCEFPPfyyATjwWx7FWNwRBcA68F3JqjDi7orHks8e2eSJPPfjie/PPnMf2Ksteb3TwpXn1VSipK/GX28u2SvGZ9a4VAEhhXugL+xa3dHeilxM2WMyffs/dZ7t944vOiNXU1OIbRt9QBKFEAtFYDAKS8XezRH5nAj5aXhP9S2vZw6eazzARxZn5WSh2kekQANwO4OEs3f0tMv8BvZqHmmEucB4UlcODsz2RJNnsi2dSP6mSA0QUZuZtyCx4RQAkrrq67of+kfCHwoHYCu+AL3NoSBoTwoxIJAqEgc6hPgBk0Bt1q/t2tENn1q4xlWn/3l2VgKGkn599+I13DU5toqzKAVupJWK0GHdJ2sR2WQwm9HoT9HoN9GY96zS6hEYUvFqY/ADaU+U4Y2ZzYnT0QikmaYPRKKLRKKKSBL/NbIlw4oahUHDBca8HvT4vvrB/y/y4Xl/ePepBVziIod44AvE4/PEo5KHEiaDoJ9QJWWAAEhhXVtXh1tLq31fU1/w5a6O5yR4oNpLpVpgE4CJmNhBRJFWF5AHBlRnGCABYN6VZzg6fZeYniKhrtieSA6dd3JTThL0AxuluJ8EAIDocle0dPR0fFTWaV1teFJYN9noUFUMWWTSWxp2EsdVwDLFoFOwBcAzo5gEARDqd9mytQYTO4IbWIEJrEC8V9cIXdRYBRpseRrMeeosOgoYgIxHVWcSgo9F0NRQBcRLrOlp+uTcSusUTDSMYj2E4EsFoPIYQAcFEHIFEHCEpgWAigehADJCkExMlAAIp6eaFNGqEdEjMgEbA2vJ5kb8pn3f/RU1nPJlXB3OLDVBceDPp4MbUDekOH65B5q3upgxt5zKlAP4RQDZb2WkladL34SzVTkkTmw8AAShmlBlVZyIALKhd4PKy97qKOufTe57rOK+3ZQTxWFzJf5YrhAmpdZT/kziBRCiBcFDJrwZWMrCl1Acz6etXl+rnGc2TvI6YmW549fmlLwY94FgUk547UsTriVUsAAhTUxvKzJDBqLbYcFt1Y/QTtXV3n1vT+OtMirdppChZjpPqhj8gs+AVAfw1gP9KU/5xZFYz/J6I8tXEzBXNze3M/AgR5XOqXggpf09mng/gHiiqj3RIAF4o5rinOHPpdOki5HBeccKczEGODma+QuOU73W/U/5A2zZ3+WCnF/F4QlEvTOH9qiw6x4Ry+o5YBioXObxXfmKlH588uezAYN8lowbdAvbGIU5RoGZDAoNBqLBYcVlJOa4vrdl2vbPiIWtV1RvTOnBmHmTmf8ij/lNE9PM0Za9A0fOa05QTgIuZ+YcT1Q3MbERmNYMH+VkzjHExM2/Ps829RPRunm38UP5QbWnKawB8FcC9efabL/cz8y0pri8EUJml7TMozPQOAL7GzHfnUX8DEX2rwLFmiiV5Pjv7iOieaZrLiizlGmCiHS9REMDD3nD/H8oWWz9z7J3h24/vH5k3eNQDKT69LxVmwOIwQdJHNpsEx6SDhV8dbq5xRYLGmdhflYs6XFBSEb/IXrru+op5jy2qr99JRNl8/6ebM5KfXEn7IBLRe8y8FZljLFwLwAmgd8L1DyNzEJbvENHENrnghLJayIeSAsbZD0WNdX+GOp9m5qeIaJK6q4g0Jj/58iqAe6aQ729h8pMr2axb5gIW5PfsTCXSWcqdGTM7oCxmPpal/SsA/Cn95x3Gqk4A/8bM39u36+DZg81VT+5b11U9Ohg8odMtNiwzrKVGLFnTODQxDg0z6761f9c/9Lhd0+qyKzPjI/UL8Nmqxj8vlemzjYsWHfrStI027WTbUt4H5WFNt/IToDhTPDLh+mVIbwrlxsweqhWintBDWdGuQfqIVwYAn4AioOfSNvYZAHfNVP7CJLO94JgOpvL9XZi0DAKUZ8MExaa6EtnDujKUkJGJtEpc5kD1gS2dHzq6eeRLbdv7zJFQbFqDfxMAQ7kA0SY9OanQ4z+3MxS8OBqPT+uJggaEw55h/NrdvezlsO8Lmw8eXDWNw80qRNQGZfWUtgqA+5j5hGBOxrm9KUObN3IIszjbCMmd3TeQWajew8zXYPqixhXCZQA+w8zpVEQq008FFDf5mwHcAuAjAC5FbrG0W6CEK50cMYo5UHXgzWN/t+57e+52NwcaBjpGEQ3HQJrpzbpARKha7PBVLXf0TSw7HPOvbgn7NWA+yYus2DABbX4P2oKj5ZtM7ruWafS3feetLa/93bwFP6yuq5tpl9KZYCeUlV066gHcCuB/kv/+GDKrGZ4r0rxyZSoPw3YoetIL05QbAPwQihPDXDn4qwHwIwDXMfMniMgzA2OejtYTs+Gs0wPgtrEzk5ME77Gu3ts3/KL5oe63PPN7W4YRjyoHa4JY5O9+oipBZphtZoh2abNTU3N0fBkB2D88dFtbYBQg5eBrzHphYr1iIJIAMDAQ8KOf/PpDcuz6jnjkoy817/vDR0vm30vz7MNFGmq6ycUkZT2AbyK9ugEAPsnMv4QifB5AemuGQQC785rh1ElpZ5wLRBRl5keQXvACii70Xijb7WJ7W3UhtcmdDtkzIFwF4AFmfnAKut5cOR2tILpmeLweAHcQ0VjcFEXwMjO17e96aM9vjn61eWMXwsEoNBphSgKXGWBmsKw8FwIJ0IgCBEEDEgiCQAAxBB2g0QhoXFGNhavqXWP1x5CZxUd3b3fWma0oF3WIyRIiiQRCiQQSAoFJCewjsQxJkiGzDMisOHuACtYJC0QQAAz4fXjC79O8Ewnc2ibHG5j54zNgapSK70KJ9pUr2YKQAMoD2A7g7Ax1LoVyeHF+8pOO1ws8VBtjF/LzGgtDCfgyFV4BsAOZhe9tmB497/eJ6AepCpj5IwB+jMzB6e8G8N/IHnFuIo9gcsaOTHTk2f9s8BqAR/Oof2i6JpKC9wDcREQnxbYRSSDs23z4ywdf7P3q4W0uQDMWoyFHTghYnMjOIIoijCYtDDY9TDYDoJcgGihgdRi9phKjz2wzRIw23bHOZtdLvcfdPSabHo4VGixYXp/SRKbJ4fzUzVLCNMBB+KJR9MV96B8N4q9Xn/dxg9W80u3zG4ZjEctgOGjzxKLOqE6n8cajGIqG4YlHEY/Fk8JYEcJj7sG5MCaA9w250R+NXBgQeD0z30hE+cQhKAb70qURKZSkTe9jAH6OzJ5sdwBYhcyr6IIDryTpL/b9ZSPp4vkQFF13pgdiOrbbaQPDE9F6Zj4OJXh9On2uHcCZyN+srOjP0RzANYfvaeNEoQsAoqu559qtv3rvocPbewAN5aRCZVlxhmCZYTDqYbTqYSrRwV5rhrPWCtHEh0xlYsBZ40jYnJY3HDWmLRaLbgTQDQHwavViMBFLEV3yjsmXkq7DW1PN4wDwWjLwjQjlQSyBL1zRzbH57lDg8l6fZ0W7xyN4dZozBjlhPzA8CLcUhycWxWg0Ak5IICIIhBTKiwlfFAno93nx464jq22keYqHhm6gsrKZCqgCZAiqMkVegLJyKk1TTlBMy5Zk6KMPU199zlaQnD9BscSYrcho6TiKzBYFegA3In/BO13P0Wwyk8+OF+/HmBYBrETm7CqfZubHJh46i+9u7PrXzl2DSmyYDLKHZYYsM/R6PQwOHRw1RpQ22qCxSgcqFzpijhrrb0Sr1F5aWRortZe+OVMp4RknhPNw8tMOZfv4NJBMvhXl5Z6R/obDOpsuZLF86uDQQOXheLhmgKWa/d4hDMZj8EUiADM0lF4Ei4IGbt8oXhhxX75cZ7qLgB/MJVujAvEBOAAlqlI6rsrSx4axjLCnGkSUYOZ/hRJtLd8g8NOJiOwr7dM2NvYcZgsR3Tj2D2Z+Bpjo7nUSVigWMv88Xh8v+o6HLwn5I2nVC7LE0Gm1MJboUb24BBo7t8w7s7RdsPGTTSur/DU1NZvmcnD0BADS00EAY6m81yVXyfXvtLWd1WarOP9IOPDhd/3eZe1yxNDh9yEci4GYU6ojBCLsHXZjn872GQH4wZy98RxJCp7fQUlPUuiW+v+KN6OZh4jamPkLmJ4syIVyqj9apysTBeWjUEwsM+0kboeS5fvEwbw40uuf7BTBgJSQodWJqFzgQEmj+XDN8pIt1cvsryw5u+mNbEGy5zrJVbILSmzalwj4Su/Q0Hmv9LmWdzj8n9k+7F51OBHVD/h8IKKTUv4IRIhIEva5j88VE6Ni8BKUuAz2Atq2QUkrdKrzHJQYCdksCmaKMmTfQs9kAlGV1LwNxdwykwtyGYC/AvDTsQviJCsCiaHVimhcUY2G80v76s8qf2zROfWPnurCNhMMoLqsbBeAXQLwi+MjI5duGnY/+LLbdcUmzwAGAn7lQC65IGQAMWnG5e50GvL3Q1nt/VMBbX9HRN4izGFWV3hEFGLm/wLwbNbKxSGtmVbSUeUryJwpRIaSQidf5pJDSLGYNZM3ImJm/iaUHWO6/JQE4IvMvIuI3gEmvDFZZlQ0OrF0bbVnySU1j9cvqf3ZKRKbtGjIAGqczq3MfNVHnRVrX3Qfu+/5/mNr/zTcrwkl4ieE7yxYlT+QzHGWL1vTpZgZI/nw/C+Av0d+GQqO4H3niqlyLjMX6oDxNSJqKcIc3oASgDxb7qxiUMfMEwOqiFACzK9B9tgDISj5z/Ll88x8Y/Zqk3gXwL/PgN1wIVxd4LPTA+D+qd4TEQ0x868B/GeGavMBfJuZP0JEfELwsgyUN9rllR+vfmLNJ5c8aiPbTNq6zTmSP8YGDbChubX11p9r9D/7ifuoLSHJs+XKswaZQzmmw5Y8Vc22RD8I4LcA7sqj79eJqFhxd6uR2R05Ez+D4o45JYjIy8zfAvDLqfaVA/+c/BTKL5G/DS8ArE5+8mURlCSowQLaTjeNKCzgUDcyB0vKh19AyUGYKU71WgDXAXhBURQzIAiE+edWjlz+yXM+/0EXuuORACxbvPiZG2vq/3SGoxSSfMqpdnNKv5N80byO/LZtvy1oRsWnmD/Ks1CyCMxljgD4eqosLdNIHKef+3DBno8TIaJhjNPhpkEDJdbG+5HOCQRBpDhOTxfBKaMVxcR0RkabI6zDuJPXLPwZwL7pm8rskAygU0ja9JniGQCXz1CcBpX8eBzASJY6lwJYpAheAmRZxtHd/eWbf7/7c8xcyOn2aYlIBFdn52XPdbWdf8Q7Ak2eaYPmAPm8LWLIPbPBgZmy1Z4FXsTMHbLlSgyKh+E9WVyzp2t1UMx+T+UVTNq5J23Zs+marQC+/L4UEYCBDp/Yst793dd/vnt7y572+5h9k9K+f1DQAIj296/8zYF3nvzm8SNbnhzurYslpjUs5XSl3c75TZHUA+eaxPOZPOcxnaZPE82uZKT/Po3ZOktu4f8Fualp0t1XMe43DsVc7xkAVxLR3USUaUXFRRo3FTJy3w2bcugrH7L+ZgWSap5T9YJ7HNm/p9tP/pEI6GkZxkh3YLlrr+f7PQc89xw50PWbM1ZUPi2Ixnb+AJh0M7PDOzx8+abB/r/9fHvzx17zDgpH/V5FFTO9L+r/RYasEVPgSJ75z/4A5cHJ9MfDULzd8mEn8ju4y4eDE/7dBSWcpTVF3ZxUKUR0lJnXQjmNzkS63+w7SMZenQJHAWzL4/eLALgTit1oselOl3U6BV9Cehd0ANic59jfwtSyRqRjNIVFw4+QOXVVxvMvItrLzDcgixck/eAT69jd4T0prTszwBJDZ9CielEpalfZYnUrKtaXN9q/P29R5VY5MRctSqYGM1e/1d977btDAw9s8/Yv2z46guP+URDjJAcKACCtFjcJpuZnP37byg/Au0hFRaXI0K/ue4NbtrtSuwwzIEkyBBJgLzPDOd8sk57/uOxD9YNiCT0xb2XpQLWzumtOJUfJEWYu2dXa6nATX7bN477oaCiwtjUaqm8LjCIaj6UNKSkzw2ww4qs1C1q+fP6ly1TBq6Kiki/04iNvHn7n+c7F8biUMTIZM4MlwGgywFxigMaekKsXl8fjiP5x/srK0Yr5jvbBRN+zZ606i40wDswVTzcCIAe51tN1VOyOjVqGbKY73uzucnh14qXdYf/CQ0Gf6BEFDAYCgCxDyBAkBwASsoQLaxvwcMOS/75s/hlfOgXfOSoqKrMMNe9su2Pfs11PtW7tUaRUjmEhxyoaLQbYy8zQmBgaWyJet6Qaogl7whTYX11fgYpaZ8haZXo+ovUeNxoNKEEJAGOIiIaKcQPM7EAYNkTCgMcDhCNwVdquGYwEV7UeP4bjLFsEs+Fj7SMjphbvEPnNRnEgFsVAKIiEpKxX0wXEmUiCZZRbrPjawpVt91bVX0lOp6sY96CiovLBgphZ++7mQ4/tf67n7vbdvYDA+eVWY0Ael2UCBGh1Ikx2A8wOA4w2PSQhIot2SjhKLbCVWuCotPbVLSu5qbyhfJKheltPz/Ws114VjZ7sUh6XE4jE44gmJISjcYQgI2TU2VmW10QSiaaRUAjH/aPoDQcRNOh1QQEYDIcwEI0gEI1AYhnMAFguKDNFQpZhNxnxuaZlbV9vOvNGvdX6Xl4dqKioqCQRk1kIPmu12vo1RjzYsWMA8Vg897Q/hHEHc4oAjsfi8A7E4HH7wMwgJoEE0hENQZZkLL1kfkPlIsdfYIKHEDPXfG33tp9uivqqaYKHWEJmBBMJRGUl7U9UlpFgGdF4HHEpAWZAUiQr4FHmoQQ5V+Z2wkaE8rPDlZkhg7HQWYY7qxvbvlK34iqymrrz6kRFRUVlHCIAEJEEwtfbWjrbKxY5/qNtS1+tu8MLWZaTudHy7JUUoTc5nAxDQxrI2lhrTVP5uonNdh4+eMHBeLh6h+sokMJRYXyPqVbl4ljpxDCXBaAIXMBqMODqylrcVdmw5dry6rvJrgpdFRWVqfG+HS8DZyxp+jUz/6l04YH/6nxr6ObBgyH9oMuLRCwBCFNP784MWB0mOOvMe5O+zSfRGQyeecgzDBI0k0y4ZgKGInBJEGDXG3Ce3Ymr7BUHryqteHRFY9NTczngu4qKyqnDJC8XIuolgW7vHzr+s+5dng+79g/e4T7kr/P3R+H3BBXpOQUhLGmj7JxveG3idQ2AY0jc0hePFGPBmjNjwpYJ0IoiFthKsESjD1xRWtlxnsXxyHkLF/2OiHIKNKOioqKSCyndC1lmVDprtwPYzsz/cXhv9w1db/dd5XGFbhrqCFhG3SGEAxEws6LfpRwFsQxULnSS1ii9ObEocfSo4SP7dmgjkpQ18eRUYCimcTJYicomalBltmKZ0coL9Ka3ltudL9xS07i+yulsJ6LTMWi0iorKLJPVrzsZrelp0uDpSMj/3b52/4f72kbu7Ds0Uh8alKyDXaMIDIcQj0pIJBJgcFIvnNTHjpOhGlGAoURoOefKc7wTx3k9Fr42aLecEe/3QszzACwVPO6/MstJL3YN9IIGFp0OC6wONGp0WG5zDK4uKd+xyub8ZU1JyUYiCheShkFFRUUlV3IOqMESoNdbDwI4yMw/xvWY19F69MYRl98SDwi3ug71lgQHYk5dwkSewQACIyHEQomkCRdDlhjWMjMsVdo9EwN9EICN7uOlR0NBgUA5O8IxkmnmgaQKhCAIGgikpOnRaTSwa3WoNVtQqtXDHAh6zq+qkatN9p3zSLPjrIqqQw6H408AAnM0sr6KisppSEGRjJJeaW1QEiSCmR9efGO1yP18mbc/sPK9fW2QQ8Y6u9F5w8Axj+Bx++AfDAkNSypKl5xbNym4ikgEjcn4T/0DSpRB5skycEyVIWo00AoCdIIGBo0IvUYDkyjCotNDCgYlMRgZabQ7sKC0Ahai/aOuni1rHPOwpKrSd2ZM/ywaK0JQBO0pF9FcRUXl9GD6lKkCwBI7XKMucjU3Ixot1S1qbLzDXm56wm63n2TRQAAePbDnqRHwLWEpboxJ0kkTIxBMgiaoIQGuIfeWI8d6mkstRlSbraiy2lBvLcGS6irYWbP/wKZNGy6ur0f9iosBO/wzHKVfRUVFJSv/D5XUdWHG7pjJAAAAAElFTkSuQmCC" alt="" width="140" height="25" style="display:block">
+  </div>
+  <div class="kicker"><span class="dot"></span>Домашнее задание · Тема 08</div>
+  <h1>Радар партнёрских рисков</h1>
+  <p class="subtitle">15 партнёров, 15 сигналов. По каждому описанию определите категорию риска и верный план реакции AM - так, как на воркшопе.</p>
+
+  <div id="quizView" class="quiz-view">
+    <div class="topbar">
+      <span class="progress-label" id="progressLabel">Вопрос 1 из 15</span>
+      <span class="score-pill">Верно: <b id="scoreNow">0</b></span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+
+    <div class="card">
+      <span class="q-index-pill" id="qIndexPill">КЕЙС 01</span>
+      <div class="scenario-label">Партнёр</div>
+      <p class="scenario-text" id="scenarioText"></p>
+
+      <button class="hint-toggle" id="hintToggle" type="button">
+        <span>💡</span><span id="hintToggleLabel">Показать подсказку</span>
+      </button>
+      <div class="hint-box" id="hintBox"></div>
+
+      <div class="options" id="optionsList"></div>
+
+      <div class="feedback" id="feedback">
+        <div class="fb-title" id="fbTitle"></div>
+        <div id="fbText"></div>
+        <span class="cat-tag" id="catTag"></span>
+      </div>
+
+      <div class="nav-row">
+        <button class="btn-next" id="btnNext" type="button">Далее →</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="resultsView" class="results">
+    <div class="score-hero">
+      <div class="big"><span id="finalScore">0</span> / 15</div>
+      <div class="verdict" id="verdictText"></div>
+    </div>
+
+    <div class="cat-breakdown">
+      <h2>Разбивка по категориям риска</h2>
+      <div id="catRows"></div>
+    </div>
+
+    <div style="display:flex; gap:12px; flex-wrap:wrap;">
+      <button class="btn-restart" id="btnRestart" type="button">↺ Пройти заново</button>
+    </div>
+
+    <div class="review">
+      <button class="review-toggle" id="reviewToggle" type="button">
+        <span id="reviewArrow">▸</span> Показать разбор всех 15 кейсов
+      </button>
+      <div class="review-list" id="reviewList"></div>
+    </div>
+  </div>
+
+  <footer>Evenbeter · Воркшоп 08 · Риски закрытия проектов</footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var CATEGORIES = {
+    reg:  { label: "Регуляторный риск",        color: "#F2B84B" },
+    fin:  { label: "Финансовый риск",           color: "#04A696" },
+    mkt:  { label: "Трафик и маркетинг",        color: "#E44EFF" },
+    prod: { label: "Продукт и технологии",      color: "#4EA8DE" },
+    comp: { label: "Конкуренция и рынок",       color: "#F2704B" },
+    team: { label: "Команда и менеджмент",      color: "#6FCF97" }
+  };
+
+  var CATEGORY_ORDER = ["reg", "fin", "mkt", "prod", "comp", "team"];
+
+  var QUESTIONS = [
+    {
+      scenario: "Партнёр - оператор казино и live-покера для азиатской аудитории, лицензирован через PAGCOR (Филиппины). За последний месяц в новостях трижды поднимался вопрос об ужесточении регулирования офшорных операторов, а сам партнёр впервые запросил у вас данные о запасном плане на случай отзыва лицензии.",
+      hint: "Тревога здесь не про деньги и не про трафик, а про юридический статус работы на маркете.",
+      category: "reg",
+      options: [
+        { text: "Регуляторный риск - верифицировать статус лицензии, подключить legal/compliance и начать прорабатывать alt-market roadmap.", correct: true },
+        { text: "Финансовый риск - провести health-check юнит-экономики и предложить гибкие условия оплаты.", correct: false },
+        { text: "Риск конкуренции - проанализировать УТП и предложить персональные бонусные условия.", correct: false },
+        { text: "Риск команды - ускорить онбординг нового контакта на стороне партнёра.", correct: false }
+      ],
+      explanation: "Запрос запасного плана на случай отзыва лицензии и волна новостей о регуляторе - классический сигнал регуляторного риска. Немедленная реакция AM - верифицировать статус лицензии и подключить compliance, среднесрочно - прорабатывать alt-market roadmap и диверсификацию гео."
+    },
+    {
+      scenario: "Партнёр (казино, ЕС) последние два месяца платит по инвойсам на 8-10 дней позже обычного графика. На вопрос о причине маркетинг-директор уклончиво отвечает, что «сейчас сложный период», и просит отсрочку по следующему платежу.",
+      hint: "Ключевое слово здесь - «платит». Это не про регулятор и не про продукт.",
+      category: "fin",
+      options: [
+        { text: "Регуляторный риск - подключить legal/compliance для проверки условий сотрудничества.", correct: false },
+        { text: "Финансовый риск - провести financial health-check и предложить гибкие условия оплаты.", correct: true },
+        { text: "Продуктовый риск - эскалировать баги в приоритет и обсудить honest roadmap.", correct: false },
+        { text: "Риск конкуренции - провести анализ УТП и предложить custom bonus terms.", correct: false }
+      ],
+      explanation: "Задержки платежей и уклончивые ответы про «сложный период» - прямой сигнал финансового риска. Начните с health-check финансового состояния партнёра и предложите гибкие условия оплаты, вместо того чтобы просто давить на срок."
+    },
+    {
+      scenario: "Ваш основной контакт на стороне партнёра (покер-румы, СНГ) две недели не отвечает на письма. На последнем созвоне присутствовал новый человек, который не был в курсе истории сотрудничества и договорённостей по бонусной программе.",
+      hint: "Сигнал здесь не про деньги и не про продукт, а про то, кто сейчас по ту сторону стола.",
+      category: "team",
+      options: [
+        { text: "Риск команды и менеджмента - быстро онбордить нового контакта и заново презентовать ценность сотрудничества.", correct: true },
+        { text: "Риск конкуренции - предложить эксклюзивные бонусные условия, чтобы удержать партнёра.", correct: false },
+        { text: "Финансовый риск - пересмотреть модель сотрудничества с CPA на revshare.", correct: false },
+        { text: "Продуктовый риск - подготовить план по новым игровым провайдерам.", correct: false }
+      ],
+      explanation: "Смена контакта, который не знаком с историей отношений, - классический сигнал риска команды и менеджмента. Нужно быстро онбордить нового человека и заново показать ценность партнёрства, пока отношения не разладились из-за потери контекста."
+    },
+    {
+      scenario: "На маркете, где работает ваш партнёр (казино, Латам), два месяца назад один из конкурентов запустил агрессивную бонусную кампанию с крупным welcome-пакетом. Партнёр стал чаще сравнивать условия сотрудничества с конкурентами и запрашивать более выгодный рейкбэк.",
+      hint: "Триггером стало не решение самого партнёра, а действие третьей стороны на рынке.",
+      category: "comp",
+      options: [
+        { text: "Регуляторный риск - готовить alt-market roadmap на случай ужесточения правил.", correct: false },
+        { text: "Риск конкуренции и рынка - проанализировать УТП и предложить персональные бонусные условия.", correct: true },
+        { text: "Риск команды - ускорить онбординг нового контакта партнёра.", correct: false },
+        { text: "Продуктовый риск - честно обсудить сроки обновления roadmap платформы.", correct: false }
+      ],
+      explanation: "Агрессивная активность конкурента и запросы более выгодных условий - сигнал риска конкуренции и рынка. Правильный ход - анализ УТП и персональные условия, а не пересмотр всей финансовой модели."
+    },
+    {
+      scenario: "За последний месяц количество тикетов в поддержку по проблемам с выводом средств у партнёра (казино, Tier 1) выросло почти вдвое. Партнёр стал чаще запрашивать roadmap развития платформы и выражает нетерпение по срокам.",
+      hint: "Ищите, где именно возникают жалобы - в работе платформы, а не в деньгах или маркетинге.",
+      category: "prod",
+      options: [
+        { text: "Продуктовый и технологический риск - эскалировать баги в приоритет и честно обсудить roadmap.", correct: true },
+        { text: "Финансовый риск - предложить гибкие условия оплаты на ближайший квартал.", correct: false },
+        { text: "Риск конкуренции - предложить custom bonus terms, чтобы сгладить недовольство.", correct: false },
+        { text: "Регуляторный риск - верифицировать статус лицензии партнёра.", correct: false }
+      ],
+      explanation: "Рост тикетов по выводу средств и нетерпеливые запросы roadmap - сигнал продуктового и технологического риска. Приоритизируйте баги и дайте честную коммуникацию по срокам, не обещая невозможного."
+    },
+    {
+      scenario: "Партнёр (казино, недавно запущенный проект) уже третий месяц подряд показывает отрицательный ROI на маркетинг. Объём депозитов не растёт, хотя бюджет на трафик не срезали.",
+      hint: "Три месяца подряд не сходится одна и та же метрика - это финансовый сигнал, а не про людей или продукт.",
+      category: "fin",
+      options: [
+        { text: "Финансовый риск - провести health-check юнит-экономики и рассмотреть пересмотр модели и KPI.", correct: true },
+        { text: "Риск конкуренции - провести QBR с акцентом на долгосрочную ценность партнёрства.", correct: false },
+        { text: "Риск команды - выстроить отношения на 2+ уровнях контактов.", correct: false },
+        { text: "Продуктовый риск - подготовить план по новым провайдерам игр.", correct: false }
+      ],
+      explanation: "Устойчиво отрицательный ROI - сигнал финансового риска, даже если бюджет формально не урезали. Нужен health-check юнит-экономики и, возможно, пересмотр модели сотрудничества и KPI."
+    },
+    {
+      scenario: "Партнёр (покер, Tier 2) снизил частоту запуска новых маркетинговых кампаний. Несколько ключевых аффилиатов, которые раньше приводили основной трафик, перестали работать с партнёром за последние два месяца.",
+      hint: "Смотрите, где именно снижается активность - в привлечении новых игроков, а не в существующей базе.",
+      category: "mkt",
+      options: [
+        { text: "Риск трафика и маркетинга - провести совместный аудит воронки и протестировать новые каналы.", correct: true },
+        { text: "Регуляторный риск - подключить compliance для проверки требований маркета.", correct: false },
+        { text: "Риск команды - заново презентовать ценность сотрудничества.", correct: false },
+        { text: "Продуктовый риск - эскалировать баги платформы в приоритет.", correct: false }
+      ],
+      explanation: "Отток ключевых аффилиатов и падение частоты кампаний - типичный сигнал риска трафика и маркетинга. Нужен совместный аудит воронки и поиск новых каналов, а не финансовые или продуктовые меры."
+    },
+    {
+      scenario: "Партнёр планирует расширяться на несколько новых стран ЕС. В разговоре выяснилось, что команда партнёра рассчитывала на одну лицензию MGA для всего Евросоюза и не закладывала бюджет на отдельные требования Франции (ANJ) и Германии (GGL).",
+      hint: "Путаница здесь не про деньги, а про опасное заблуждение «одна лицензия на весь регион».",
+      category: "reg",
+      options: [
+        { text: "Регуляторный риск - подключить legal/compliance и проверить требования по каждой стране ЕС отдельно.", correct: true },
+        { text: "Риск конкуренции - предложить персональные бонусные условия на новых маркетах.", correct: false },
+        { text: "Продуктовый риск - подготовить план по новым фичам для локализации.", correct: false },
+        { text: "Финансовый риск - пересмотреть модель сотрудничества с CPA на revshare.", correct: false }
+      ],
+      explanation: "Регуляторная фрагментация ЕС - MGA не покрывает Францию, Германию и другие страны с собственным регулятором - классический регуляторный риск при выходе на новые гео. Нужно заранее проверить требования каждой отдельной юрисдикции."
+    },
+    {
+      scenario: "В компании партнёра прошло слияние двух отделов. После этого бюджет на партнёрский маркетинг урезали, а решения по сотрудничеству теперь принимает новый руководитель, который раньше не работал с гемблинг-проектами.",
+      hint: "Урезанный бюджет здесь - следствие, а не причина. Ищите, что изменилось в структуре компании партнёра.",
+      category: "team",
+      options: [
+        { text: "Риск команды и менеджмента - заново презентовать ценность сотрудничества новому руководителю и выстроить отношения на нескольких уровнях.", correct: true },
+        { text: "Финансовый риск - провести health-check ROI и предложить скидку на ближайший квартал.", correct: false },
+        { text: "Продуктовый риск - подготовить честную коммуникацию по roadmap платформы.", correct: false },
+        { text: "Регуляторный риск - начать прорабатывать alt-market roadmap.", correct: false }
+      ],
+      explanation: "Реорганизация и смена лица, принимающего решения, без опыта в гемблинге - риск команды и менеджмента, даже если внешне это похоже на финансовый сигнал (урезанный бюджет). Нужно заново выстроить отношения с новым руководителем."
+    },
+    {
+      scenario: "На маркете партнёра (казино, Tier 2) за последний год количество лицензированных операторов выросло почти вдвое. Партнёр отмечает, что стоимость привлечения игрока выросла, а конкуренты предлагают всё более щедрые условия по рейкбэку.",
+      hint: "Здесь дело не в одном агрессивном конкуренте, а в насыщении всего рынка.",
+      category: "comp",
+      options: [
+        { text: "Регуляторный риск - верифицировать статус лицензии партнёра на маркете.", correct: false },
+        { text: "Риск конкуренции и рынка - проанализировать УТП, предложить персональные условия и провести QBR о долгосрочной ценности.", correct: true },
+        { text: "Продуктовый риск - эскалировать баги платформы в приоритет.", correct: false },
+        { text: "Риск команды - ускорить онбординг нового контакта.", correct: false }
+      ],
+      explanation: "Рост числа операторов и общее удорожание привлечения - сигнал насыщения рынка (риск конкуренции). Нужны персональные условия и QBR, который показывает долгосрочную ценность сотрудничества, а не разовая скидка."
+    },
+    {
+      scenario: "Партнёр (казино) уже полгода не получал новых игровых провайдеров через вашу платформу. Retention и средняя длина игровой сессии снижаются, хотя объём трафика остаётся прежним.",
+      hint: "Трафик тот же, а вовлечённость падает - ищите причину внутри продукта, а не снаружи.",
+      category: "prod",
+      options: [
+        { text: "Продуктовый и технологический риск - составить план по новым игровым провайдерам и честно обсудить сроки обновления каталога.", correct: true },
+        { text: "Риск конкуренции - предложить custom bonus terms, чтобы удержать игроков.", correct: false },
+        { text: "Финансовый риск - пересмотреть модель сотрудничества и KPI.", correct: false },
+        { text: "Регуляторный риск - запросить актуальные compliance-отчёты.", correct: false }
+      ],
+      explanation: "Падение retention и длины сессии при стабильном трафике указывает на продуктовый и технологический риск - устаревший каталог игр. Решение - план по новым провайдерам и честная коммуникация сроков, а не маркетинговые меры."
+    },
+    {
+      scenario: "У партнёра (казино, недавно на рынке) сменился основной инвестор. Новая команда управления сообщила, что пересматривает приоритеты финансирования маркетинговых активностей на ближайший квартал.",
+      hint: "Несмотря на смену людей, суть сигнала - в деньгах, а не в личности новых руководителей.",
+      category: "fin",
+      options: [
+        { text: "Финансовый риск - провести financial health-check и подготовить гибкие условия на случай сокращения бюджета.", correct: true },
+        { text: "Риск команды - быстро онбордить новых руководителей партнёра.", correct: false },
+        { text: "Продуктовый риск - подготовить roadmap по новым фичам.", correct: false },
+        { text: "Риск конкуренции - провести QBR с акцентом на ценность сотрудничества.", correct: false }
+      ],
+      explanation: "Смена инвестора и пересмотр приоритетов финансирования - в первую очередь финансовый риск, хотя внешне похоже на смену команды. Готовьте financial health-check и гибкие условия заранее, до того как бюджет действительно урежут."
+    },
+    {
+      scenario: "Партнёр (покер, СНГ) сообщил о блокировке одного из основных платёжных провайдеров на его маркете. Часть игроков временно не может выводить средства, и партнёр в панике просит быстрое решение.",
+      hint: "Причина - не в продукте и не в отношениях, а во внешнем платёжном и регуляторном контуре маркета.",
+      category: "reg",
+      options: [
+        { text: "Регуляторный риск - подключить compliance и оперативно организовать альтернативные платёжные методы.", correct: true },
+        { text: "Продуктовый риск - эскалировать в приоритет баг вывода средств на платформе.", correct: false },
+        { text: "Риск конкуренции - предложить партнёру персональные бонусные условия.", correct: false },
+        { text: "Риск команды - заново презентовать ценность сотрудничества.", correct: false }
+      ],
+      explanation: "Блокировка платёжного провайдера - типичный регуляторный/платёжный риск для маркетов вроде СНГ. Нужно подключить compliance и заранее иметь план Б по платёжным методам - именно поэтому диверсификация платежей входит в фокус AM для таких гео."
+    },
+    {
+      scenario: "Партнёр (казино) на последнем разговоре впервые сформулировал цель не как «рост новой аудитории», а как «удержание существующей базы». При этом заметно снизилась частота запуска новых промо-акций.",
+      hint: "Смена формулировки цели с «роста» на «удержание» - характерный признак одной конкретной категории риска.",
+      category: "mkt",
+      options: [
+        { text: "Риск трафика и маркетинга - провести аудит воронки привлечения и предложить тест новых каналов и креативов.", correct: true },
+        { text: "Финансовый риск - провести health-check юнит-экономики.", correct: false },
+        { text: "Продуктовый риск - подготовить план по новым фичам платформы.", correct: false },
+        { text: "Регуляторный риск - верифицировать статус лицензии.", correct: false }
+      ],
+      explanation: "Смена KPI с роста на удержание и снижение частоты промо - прямой сигнал риска трафика и маркетинга: скорее всего, каналы привлечения перестали работать эффективно. Нужен совместный аудит воронки и тест новых каналов."
+    },
+    {
+      scenario: "Партнёр (казино) нанял внешних консультантов по ребрендингу и репозиционированию. При этом вы заметили, что партнёр практически исчез из обсуждений в профильных Telegram-чатах и на форумах, где раньше был заметен.",
+      hint: "Наём консультантов по репозиционированию и потеря видимости на рынке - это сигнал не про внутренние процессы партнёра.",
+      category: "comp",
+      options: [
+        { text: "Риск конкуренции и рынка - провести анализ УТП и QBR с акцентом на долгосрочную ценность сотрудничества.", correct: true },
+        { text: "Риск команды - быстро онбордить новый контакт партнёра.", correct: false },
+        { text: "Регуляторный риск - начать прорабатывать alt-market roadmap.", correct: false },
+        { text: "Продуктовый риск - подготовить план по новым игровым провайдерам.", correct: false }
+      ],
+      explanation: "Наём консультантов по ребрендингу и потеря видимости в отраслевых чатах - сигналы риска конкуренции и рынка: партнёр теряет позиции и ищет способ переизобрести себя. Нужен анализ УТП и QBR, показывающий ценность продолжения сотрудничества."
+    }
+  ];
+
+  function shuffle(arr) {
+    for (var i = arr.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+    }
+    return arr;
+  }
+
+  function shuffleAllOptions() {
+    QUESTIONS.forEach(function (q) { shuffle(q.options); });
+  }
+
+  shuffleAllOptions();
+
+  var state = {
+    index: 0,
+    score: 0,
+    answered: new Array(QUESTIONS.length).fill(null) // stores chosen option index or null
+  };
+
+  var els = {
+    progressLabel: document.getElementById("progressLabel"),
+    scoreNow: document.getElementById("scoreNow"),
+    progressFill: document.getElementById("progressFill"),
+    qIndexPill: document.getElementById("qIndexPill"),
+    scenarioText: document.getElementById("scenarioText"),
+    hintToggle: document.getElementById("hintToggle"),
+    hintToggleLabel: document.getElementById("hintToggleLabel"),
+    hintBox: document.getElementById("hintBox"),
+    optionsList: document.getElementById("optionsList"),
+    feedback: document.getElementById("feedback"),
+    fbTitle: document.getElementById("fbTitle"),
+    fbText: document.getElementById("fbText"),
+    catTag: document.getElementById("catTag"),
+    btnNext: document.getElementById("btnNext"),
+    quizView: document.getElementById("quizView"),
+    resultsView: document.getElementById("resultsView"),
+    finalScore: document.getElementById("finalScore"),
+    verdictText: document.getElementById("verdictText"),
+    catRows: document.getElementById("catRows"),
+    btnRestart: document.getElementById("btnRestart"),
+    reviewToggle: document.getElementById("reviewToggle"),
+    reviewArrow: document.getElementById("reviewArrow"),
+    reviewList: document.getElementById("reviewList")
+  };
+
+  function renderQuestion() {
+    var q = QUESTIONS[state.index];
+    els.progressLabel.textContent = "Вопрос " + (state.index + 1) + " из " + QUESTIONS.length;
+    els.scoreNow.textContent = state.score;
+    els.progressFill.style.width = ((state.index) / QUESTIONS.length * 100) + "%";
+    els.qIndexPill.textContent = "КЕЙС " + String(state.index + 1).padStart(2, "0");
+    els.scenarioText.textContent = q.scenario;
+
+    els.hintBox.textContent = q.hint;
+    els.hintBox.classList.remove("shown");
+    els.hintToggleLabel.textContent = "Показать подсказку";
+    els.hintToggle.disabled = false;
+
+    els.feedback.classList.remove("shown", "ok", "bad");
+    els.btnNext.classList.remove("shown");
+    els.catTag.textContent = "";
+    els.catTag.style.background = "";
+
+    els.optionsList.innerHTML = "";
+    var letters = ["А", "Б", "В", "Г"];
+    q.options.forEach(function (opt, i) {
+      var btn = document.createElement("button");
+      btn.className = "option";
+      btn.type = "button";
+      var letterSpan = document.createElement("span");
+      letterSpan.className = "letter";
+      letterSpan.textContent = letters[i];
+      var textSpan = document.createElement("span");
+      textSpan.textContent = opt.text;
+      btn.appendChild(letterSpan);
+      btn.appendChild(textSpan);
+      btn.addEventListener("click", function () { selectOption(i); });
+      els.optionsList.appendChild(btn);
+    });
+  }
+
+  function selectOption(choiceIndex) {
+    if (state.answered[state.index] !== null) return; // already answered
+    var q = QUESTIONS[state.index];
+    state.answered[state.index] = choiceIndex;
+
+    var buttons = els.optionsList.querySelectorAll(".option");
+    buttons.forEach(function (btn, i) {
+      btn.disabled = true;
+      if (q.options[i].correct) {
+        btn.classList.add("correct");
+      } else if (i === choiceIndex) {
+        btn.classList.add("incorrect");
+      }
+    });
+
+    var wasCorrect = q.options[choiceIndex].correct;
+    if (wasCorrect) {
+      state.score += 1;
+      els.scoreNow.textContent = state.score;
+      els.feedback.classList.add("ok");
+      els.fbTitle.textContent = "✓ Верно";
+    } else {
+      els.feedback.classList.add("bad");
+      els.fbTitle.textContent = "✗ Не совсем";
+    }
+    els.fbText.textContent = q.explanation;
+    var cat = CATEGORIES[q.category];
+    els.catTag.textContent = cat.label;
+    els.catTag.style.background = cat.color;
+    els.feedback.classList.add("shown");
+
+    els.btnNext.textContent = (state.index === QUESTIONS.length - 1) ? "Показать результаты →" : "Далее →";
+    els.btnNext.classList.add("shown");
+  }
+
+  els.hintToggle.addEventListener("click", function () {
+    var showing = els.hintBox.classList.toggle("shown");
+    els.hintToggleLabel.textContent = showing ? "Скрыть подсказку" : "Показать подсказку";
+  });
+
+  els.btnNext.addEventListener("click", function () {
+    if (state.index < QUESTIONS.length - 1) {
+      state.index += 1;
+      renderQuestion();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } else {
+      showResults();
+    }
+  });
+
+  function showResults() {
+    els.progressFill.style.width = "100%";
+    els.quizView.classList.add("hidden");
+    els.resultsView.classList.add("shown");
+    els.finalScore.textContent = state.score;
+
+    var pct = state.score / QUESTIONS.length;
+    var verdict;
+    if (pct === 1) verdict = "Все 15 кейсов верно. Фреймворк усвоен - можно применять на реальных партнёрах без подсказок.";
+    else if (pct >= 0.8) verdict = "Сильный результат. Стоит ещё раз посмотреть разбор ошибочных кейсов ниже.";
+    else if (pct >= 0.6) verdict = "Неплохо, но есть категории, которые путаются между собой - см. разбивку ниже.";
+    else verdict = "Стоит вернуться к материалам воркшопа и пройти квиз ещё раз - пока сигналы риска путаются.";
+    els.verdictText.textContent = verdict;
+
+    // category breakdown
+    var catStats = {};
+    CATEGORY_ORDER.forEach(function (c) { catStats[c] = { correct: 0, total: 0 }; });
+    QUESTIONS.forEach(function (q, i) {
+      catStats[q.category].total += 1;
+      var chosen = state.answered[i];
+      if (chosen !== null && q.options[chosen].correct) {
+        catStats[q.category].correct += 1;
+      }
+    });
+
+    els.catRows.innerHTML = "";
+    CATEGORY_ORDER.forEach(function (c) {
+      var info = CATEGORIES[c];
+      var stat = catStats[c];
+      var row = document.createElement("div");
+      row.className = "cat-row";
+      var pctFill = stat.total ? (stat.correct / stat.total * 100) : 0;
+      row.innerHTML =
+        '<span class="swatch" style="background:' + info.color + '"></span>' +
+        '<span class="name">' + info.label + '</span>' +
+        '<span class="frac">' + stat.correct + '/' + stat.total + '</span>' +
+        '<div class="bar-track"><div class="bar-fill" style="width:' + pctFill + '%; background:' + info.color + '"></div></div>';
+      els.catRows.appendChild(row);
+    });
+
+    // review list
+    els.reviewList.innerHTML = "";
+    QUESTIONS.forEach(function (q, i) {
+      var chosen = state.answered[i];
+      var wasCorrect = chosen !== null && q.options[chosen].correct;
+      var correctOpt = q.options.filter(function (o) { return o.correct; })[0];
+      var item = document.createElement("div");
+      item.className = "review-item";
+      item.innerHTML =
+        '<div class="ri-top">' +
+          '<span class="ri-mark ' + (wasCorrect ? "ok" : "bad") + '">' + (wasCorrect ? "✓" : "✗") + '</span>' +
+          '<span class="ri-num">Кейс ' + (i + 1) + '</span>' +
+        '</div>' +
+        '<div class="ri-scenario">' + q.scenario + '</div>' +
+        '<div class="ri-answer"><b>Верный ответ:</b> ' + correctOpt.text + '</div>';
+      els.reviewList.appendChild(item);
+    });
+  }
+
+  els.reviewToggle.addEventListener("click", function () {
+    var showing = els.reviewList.classList.toggle("shown");
+    els.reviewArrow.textContent = showing ? "▾" : "▸";
+    els.reviewToggle.lastChild.textContent = showing ? " Скрыть разбор всех 15 кейсов" : " Показать разбор всех 15 кейсов";
+  });
+
+  els.btnRestart.addEventListener("click", function () {
+    shuffleAllOptions();
+    state = { index: 0, score: 0, answered: new Array(QUESTIONS.length).fill(null) };
+    els.resultsView.classList.remove("shown");
+    els.quizView.classList.remove("hidden");
+    els.reviewList.classList.remove("shown");
+    els.reviewArrow.textContent = "▸";
+    renderQuestion();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+
+  renderQuestion();
+})();
+</script>
